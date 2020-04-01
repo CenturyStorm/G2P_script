@@ -1,0 +1,10 @@
+Input files needed:
+- entries to process ("artists.tsv")
+- g2p of strings generated with ./g2p-full -mp -u -pb ("string.tsv")
+- g2p of tokens generated with ./g2p-full -mp -u -pb -pd ("token.tsv")
+- lang. mapping table
+
+Output:
+- g2p of tokens
+- g2p of entries
+- entries with lang.mapping applied
