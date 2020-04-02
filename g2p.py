@@ -1,13 +1,17 @@
 
 # coding: utf-8
 import re
+import sys
 
-f = open('files/en-US~de-De.tsv')
+# saving phone mapping to map_dict
+map_file = str(sys.argv[3])
+f = open(map_file, 'r')
 map_dict={}
 for line in f:
 	x = re.split(r"\t",line)
 	map_dict[x[0].strip()] = x[1].strip()
 
+# replacing phones due to map_dict
 def lang_map(pron):
 	phones = pron.split()
 	mapped = []
@@ -20,12 +24,16 @@ def lang_map(pron):
 	mapped_pron = sep.join(mapped)
 	return mapped_pron
 
-f = open('files/var_artists_spotify_Top5000_pop.tsv')
+# reading input file
+input_file = str(sys.argv[1])
+f = open(input_file, 'r')
 artists = []
 for artist in f:
 	artists.append(artist.strip())
 
-f = open('files/token.tsv', 'r')
+# reading g2p for tokens
+token_file = str(sys.argv[2]) + "/files/token.tsv"
+f = open(token_file, 'r')
 token_dict = {}
 for line in f:
 	a = re.split(r"\t",line)
@@ -35,7 +43,9 @@ for line in f:
 	else:
 		token_dict[word] = [pron]
 
-f = open('files/string.tsv', 'r')
+# reading g2p for strings
+string_file = str(sys.argv[2]) + "/files/string.tsv"
+f = open(string_file, 'r')
 str_dict = {}
 mapped_dict = {}
 count = 0
@@ -49,19 +59,23 @@ for line in f:
 				mapped_dict[artists[count]]= [lang_map(artist)]
 	count += 1
 
-f = open('output/strings.tsv', 'w')
+# printing
+write_file = str(sys.argv[2]) + "/strings.tsv"
+f = open(write_file, 'w')
 for x in str_dict:
 	print(f'{x}',file=f)
 	print(f'{set(str_dict[x])}',file=f)
 	print(file=f)
 
-f = open('output/mapped.tsv', 'w')
+write_file = str(sys.argv[2]) + "/mapped.tsv"
+f = open(write_file, 'w')
 for x in mapped_dict:
 	print(f'{x}',file=f)
 	print(f'{set(mapped_dict[x])}',file=f)
 	print(file=f)
 
-f = open('output/tokens.tsv', 'w')
+write_file = str(sys.argv[2]) + "/tokens.tsv"
+f = open(write_file, 'w')
 for x in token_dict:
 	print(f'{x}',file=f)
 	print(f'{set(token_dict[x])}',file=f)

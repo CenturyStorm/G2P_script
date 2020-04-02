@@ -1,3 +1,10 @@
+
+bash call:
+./g2p.sh arg1=archive_path arg2=inputfile_path arg3=languagemap_path arg4=output_location
+
+for example,:
+./g2p.sh "/mnt/exchange/ASR Management/spotify_pipeline/1_g2p/g2p-eand-de-DE-0.162.0-20200225.tar.bz2" "/mnt/exchange/ASR Management/G2P/Spotify_Artists_top1000/sort_lang/sort_lang_popularity/sort_lang_merged/var_artists_spotify_Top5000_pop.tsv" "/mnt/exchange/ASR Management/spotify_pipeline/3_language mapping/en-US~de-De.tsv" /home/vcernenko/Desktop/result
+
 Input files needed:
 - entries to process ("artists.tsv")
 - g2p of strings generated with ./g2p-full -mp -u -pb ("string.tsv")
