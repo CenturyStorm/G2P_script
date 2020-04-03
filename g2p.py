@@ -63,20 +63,20 @@ for line in f:
 write_file = str(sys.argv[2]) + "/strings.tsv"
 f = open(write_file, 'w')
 for x in str_dict:
-	print(f'{x}',file=f)
-	print(f'{set(str_dict[x])}',file=f)
-	print(file=f)
+	new_x = x.replace(" ",";")
+	for y in set(str_dict[x]):
+		print(f'{new_x}_langTag_domTag\t{y}',file=f)
 
 write_file = str(sys.argv[2]) + "/mapped.tsv"
 f = open(write_file, 'w')
 for x in mapped_dict:
-	print(f'{x}',file=f)
-	print(f'{set(mapped_dict[x])}',file=f)
-	print(file=f)
+	new_x = x.replace(" ",";")
+	for y in set(mapped_dict[x]):
+		print(f'{new_x}_langTag_domTag\t{y}',file=f)
 
 write_file = str(sys.argv[2]) + "/tokens.tsv"
 f = open(write_file, 'w')
 for x in token_dict:
-	print(f'{x}',file=f)
-	print(f'{set(token_dict[x])}',file=f)
-	print(file=f)
+	new_x=x.replace("#","")
+	for y in set(token_dict[x]):
+		print(f'{new_x}_langTag_domTag\t{y}',file=f)
