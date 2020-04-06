@@ -25,7 +25,7 @@ cp "$archive" "$output_loc"
 cd $output_loc
 tar xjf $var2 -C $output_loc"/files"
 rm "$var2"
-cd $output_loc/files/*
+cd $output_loc/files/g2p*
 make all
 cd bin/de-DE
 cat "$input_loc" | ./g2p-full -mp -u -pb -pd > $output_loc/files/token.tsv
