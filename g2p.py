@@ -82,12 +82,12 @@ with open(input_file, 'r', encoding="utf-8") as f:
 # output
 for unit in transcription:
 	# entry , language
-	print(unit, language[unit])
+	print(unit.encode('utf-8'), language[unit])
 	# transcriptions
 	print(transcription[unit])
 	#transcriptions per token of the entry
 	for item in token_list[unit]:
-		print(item, token_transcription[item])
+		print(item.encode('utf-8'), token_transcription[item])
 	# mapped transcriptions
 	print(mapped_dict[unit])
 	print()
