@@ -1,19 +1,30 @@
 
 # coding: utf-8
+import subprocess
 import re
 import sys
+from langid import classify
 
-# saving phone mapping to map_dict
-map_file = str(sys.argv[3])
+language = {}
+transcription = {}
+token_list = {}
+token_transcription = {}
+mapped_dict = {}
+g2pde = "/mnt/exchange/ASR Management/G2P/g2p-eand-de-DE-0.119.0/bin/de-DE"
+g2pen = "/mnt/exchange/ASR Management/G2P/g2p-eand-de-DE-0.119.0/bin/en-US"
+map_file = "/mnt/exchange/ASR Management/spotify_pipeline/3_language mapping/en-US~de-De.tsv"
+input_file = str(sys.argv[1])
+#"/mnt/exchange/ASR Management/G2P/Spotify_Artists_top1000/sort_lang/sort_lang_popularity/sort_lang_merged/var_artists_spotify_Top5000_pop.tsv"
+
 with open(map_file, 'r', encoding="utf-8") as f:
 	map_dict={}
 	for line in f:
 		x = re.split(r"\t",line)
 		map_dict[x[0].strip()] = x[1].strip()
 
-# replacing phones due to map_dict
-def lang_map(pron):
-	phones = pron.split()
+
+def lang_map(string):
+	phones = string.split()
 	mapped = []
 	for phone in phones:
 		if phone in map_dict:
@@ -21,62 +32,59 @@ def lang_map(pron):
 		else:
 			mapped.append(phone)
 	sep = " "
-	mapped_pron = sep.join(mapped)
-	return mapped_pron
+	mapped_string = sep.join(mapped)
+	return mapped_string
 
-# reading input file
-input_file = str(sys.argv[1])
+
 with open(input_file, 'r', encoding="utf-8") as f:
-	artists = []
-	for artist in f:
-		artists.append(artist.strip())
+	for entry in f:
+		entry = entry.strip()
+		# classify language
+		language[entry] = classify(entry)[0]
 
-# reading g2p for tokens
-token_file = str(sys.argv[2]) + "/files/token.tsv"
-with open(token_file, 'r', encoding="utf-8") as f:
-	token_dict = {}
-	for line in f:
-		a = re.split(r"\t",line)
-		word, pron = a[0].strip(),a[1].strip()
-		if word in token_dict:
-			token_dict[word].append(pron)
+		# run respective g2p for entries and tokens
+		byte_entry = entry.encode()
+		if language[entry] == 'en':
+			g2p = g2pen
 		else:
-			token_dict[word] = [pron]
+			g2p = g2pde
+		g2p_strings = subprocess.Popen([f'{g2p}/g2p-full', "-u", "-mp", "-pb"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		g2p_tokens = subprocess.Popen([f'{g2p}/g2p-full', "-u", "-mp", "-pb", "-pd"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		strings = g2p_strings.communicate(byte_entry)[0].decode().strip()
+		tokens = g2p_tokens.communicate(byte_entry)[0].decode().strip()
 
-# reading g2p for strings
-string_file = str(sys.argv[2]) + "/files/string.tsv"
-with open(string_file, 'r', encoding="utf-8") as f:
-	str_dict = {}
-	mapped_dict = {}
-	count = 0
-	for line in f:
-		str_dict[artists[count]] = re.split(r"\t",line.strip())
-		for artist in str_dict[artists[count]]:
-			if lang_map(artist) not in str_dict[artists[count]]:
-				if artists[count] in mapped_dict:
-					mapped_dict[artists[count]].append(lang_map(artist))
-				else:
-					mapped_dict[artists[count]]= [lang_map(artist)]
-		count += 1
+		# dict with entry : transcription_list
+		transcription[entry] = []
+		mapped_dict[entry] = []
+		for string in re.split(r'\t',strings):
+			transcription[entry].append(string)
+			if lang_map(string) not in transcription[entry]:
+				if lang_map(string) not in mapped_dict[entry]:
+					mapped_dict[entry].append(lang_map(string))
 
-# printing
-write_file = str(sys.argv[2]) + "/strings.tsv"
-with open(write_file, 'w', encoding="utf-8") as f:
-	for x in str_dict:
-		new_x = x.replace(" ",";")
-		for y in set(str_dict[x]):
-			print(f'{new_x}_langTag_domTag\t{y}',file=f)
+		token_list[entry] = []
+		for token in re.split(r'\n',tokens):
+			try:
+				a = re.split(r"\t",token)
+				word,pron=a[0].strip(),a[1].strip()
+			except IndexError:
+				word = token
+				pron = "NA"
+			word = re.sub('^#','',word)
 
-write_file = str(sys.argv[2]) + "/mapped.tsv"
-with open(write_file, 'w', encoding="utf-8") as f:
-	for x in mapped_dict:
-		new_x = x.replace(" ",";")
-		for y in set(mapped_dict[x]):
-			print(f'{new_x}_langTag_domTag\t{y}',file=f)
+			# dict with entry : token_list
+			if word not in token_list[entry]:
+				token_list[entry].append(word)
+				token_transcription[word] = []
+			# dict with token : transcription_list
+			if pron not in token_transcription[word]:
+				token_transcription[word].append(pron)
 
-write_file = str(sys.argv[2]) + "/tokens.tsv"
-with open(write_file, 'w', encoding="utf-8") as f:
-	for x in token_dict:
-		new_x=x.replace("#","")
-		for y in set(token_dict[x]):
-			print(f'{new_x}_langTag_domTag\t{y}',file=f)
+# output
+for unit in transcription:
+	print(unit, language[unit])
+	print(transcription[unit])
+	for item in token_list[unit]:
+		print(item, token_transcription[item])
+	print(mapped_dict[unit])
+	print()
