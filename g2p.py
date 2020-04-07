@@ -22,7 +22,6 @@ with open(map_file, 'r', encoding="utf-8") as f:
 		x = re.split(r"\t",line)
 		map_dict[x[0].strip()] = x[1].strip()
 
-
 def lang_map(string):
 	phones = string.split()
 	mapped = []
@@ -45,7 +44,7 @@ with open(input_file, 'r', encoding="utf-8") as f:
 		# run respective g2p for entries and tokens
 		byte_entry = entry.encode()
 		if language[entry] == 'en':
-			g2p = g2pen
+			g2p = g2pen 
 		else:
 			g2p = g2pde
 		g2p_strings = subprocess.Popen([f'{g2p}/g2p-full', "-u", "-mp", "-pb"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -82,9 +81,13 @@ with open(input_file, 'r', encoding="utf-8") as f:
 
 # output
 for unit in transcription:
+	# entry , language
 	print(unit, language[unit])
+	# transcriptions
 	print(transcription[unit])
+	#transcriptions per token of the entry
 	for item in token_list[unit]:
 		print(item, token_transcription[item])
+	# mapped transcriptions
 	print(mapped_dict[unit])
 	print()
