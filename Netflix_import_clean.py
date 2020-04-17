@@ -8,18 +8,19 @@ import zipfile as zp
 import pandas as pd
 import os
 import re
+import subprocess
 
-
-# In[330]:
+# limit number of output lines to curb computation time
+n_min,n_max = 0,500
 
 def import_data():
 
     # define paths
-    basepath = 'B:\\Exchange\\ASR Management\\netflix\\'
-    jsonpath = basepath + 'script_folder\\json\\'
+    basepath = '/mnt/exchange/ASR Management/netflix/'
+    jsonpath = basepath + 'script_folder/json/'
 
     # find latest zip file
-    # WARNING: ONLY WORKS FOR 2020 FOR NOW. For multiple year script needs tobe extended
+    # WARNING: ONLY WORKS FOR 2020 FOR NOW. For multiple year script needs to be extended
     for file in os.listdir(basepath):
         if file.endswith("_2020.zip"):
             netflix_zipfile = file
@@ -49,8 +50,6 @@ def import_data():
     return data, basepath
 
 
-# In[331]:
-
 def clean_data(data):
     
     # select data that we need
@@ -59,6 +58,9 @@ def clean_data(data):
     # make everythings lowercase
     data.loc[:,'title'] = data['title'].str.lower()
     data.loc[:,'type'] = data['type'].str.lower()
+
+    # set both columns to type string
+    data = data.astype("string")
 
     ### execute part of Vijay's script
     # replace all types of hyphens with -
@@ -81,25 +83,55 @@ def clean_data(data):
     data.loc[:,'title'] = data['title'].str.replace(' {2,}', ' ')
     data.loc[:,'title'] = data['title'].str.strip()
 
-    # delete empty lines
+    # remove double title entries
+    data.loc[:,'title'] = data['title'].drop_duplicates()
+
+    # delete empty lines and reindex
     data = data[data.loc[:,'title'] != '']
-    
+    data.index = range(0, len(data))
+
+    # limit data to n_limit entries
+    data = data[n_min:n_max]
+    data.index = range(0, len(data))
+
     print("data cleaned")
     
     return data
 
 
-# In[332]:
-
 def export_data(basepath, data):
+
     
     # export the data temporarily (optional)
-    data.to_csv(path_or_buf = basepath + 'script_folder\\output\\titles.txt', index = False, header = False, sep = '\t')
+    titles_path = basepath + 'script_folder/output/titles.txt'
+    data['title'].to_csv(path_or_buf = titles_path, index = False, header = False, sep = '\t')
     
-    print("data exported to {}".format(basepath + 'script_folder\\output\\titles.txt'))
+    print("data exported to {}".format(titles_path))
 
 
-# In[333]:
+def read_g2p(data, basepath):
+    
+
+    titles_path = basepath + "script_folder/output/titles.txt"
+    g2p_path = basepath + "script_folder/output/g2p.tsv"
+
+    cwd = os.getcwd()
+    subprocess.call("./build.sh", cwd = cwd + "/g2p_docker")
+
+    print("starting g2p generation")
+
+    subprocess.call(["./run.sh", titles_path, g2p_path], cwd = cwd + "/g2p_docker")
+
+    print("g2p succesfully generated")
+
+    g2p_data = pd.read_csv(g2p_path, header = None)
+    
+    data['g2p'] = g2p_data
+
+    print("g2p read in and appended to original dataframe")
+
+    return data
+
 
 if __name__ == "__main__":
     
@@ -112,8 +144,7 @@ if __name__ == "__main__":
     # optional exporting to textfile
     export_data(basepath, data)
 
+    # run g2p
+    data = read_g2p(data, basepath)
 
-# In[ ]:
-
-
-
+    print(data)

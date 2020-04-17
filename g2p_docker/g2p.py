@@ -1,5 +1,3 @@
-
-# coding: utf-8
 import subprocess
 import re
 import sys
@@ -13,6 +11,7 @@ mapped_dict = {}
 g2pde = "/mnt/exchange/ASR Management/G2P/g2p-eand-de-DE-0.119.0/bin/de-DE"
 g2pen = "/mnt/exchange/ASR Management/G2P/g2p-eand-de-DE-0.119.0/bin/en-US"
 map_file = "/mnt/exchange/ASR Management/spotify_pipeline/3_language mapping/en-US~de-De.tsv"
+output_file = str(sys.argv[2])
 input_file = str(sys.argv[1])
 #"/mnt/exchange/ASR Management/G2P/Spotify_Artists_top1000/sort_lang/sort_lang_popularity/sort_lang_merged/var_artists_spotify_Top5000_pop.tsv"
 
@@ -37,6 +36,7 @@ def lang_map(string):
 
 with open(input_file, 'r', encoding="utf-8") as f:
 	for entry in f:
+#		print(entry)
 		entry = entry.strip()
 		# classify language
 		language[entry] = classify(entry)[0]
@@ -80,14 +80,26 @@ with open(input_file, 'r', encoding="utf-8") as f:
 				token_transcription[word].append(pron)
 
 # output
-for unit in transcription:
-	# entry , language
-	print(unit.encode('utf-8'), language[unit])
-	# transcriptions
-	print(transcription[unit])
-	#transcriptions per token of the entry
-	for item in token_list[unit]:
-		print(item.encode('utf-8'), token_transcription[item])
-	# mapped transcriptions
-	print(mapped_dict[unit])
-	print()
+with open(output_file, 'w', encoding="utf-8") as f:
+	for unit in transcription:
+		# entry , language
+		#print(unit, language[unit])
+		# transcriptions
+		#print(transcription[unit])
+		#transcriptions per token of the entry
+		#for item in token_list[unit]:
+		#	print(item, token_transcription[item])
+		# mapped transcriptions
+		#print(mapped_dict[unit])
+
+		# limit the number of g2p entries per title to n max
+		n_max = 10
+
+		# write to file
+		if len(mapped_dict[unit]) == 0:
+			if len(transcription[unit]) == 1:
+				f.write(transcription[unit][0] + '\n')
+			else:
+				f.write('\t'.join(transcription[unit][:n_max]) + '\n' )
+		else:
+			f.write(mapped_dict[unit][0] + '\n')
