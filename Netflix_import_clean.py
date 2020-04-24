@@ -11,7 +11,7 @@ import re
 import subprocess
 
 # limit number of output lines to curb computation time
-n_min,n_max = 0,500
+n_min,n_max = 0,5000
 
 def import_data():
 
@@ -116,11 +116,11 @@ def read_g2p(data, basepath):
     g2p_path = basepath + "script_folder/output/g2p.tsv"
 
     cwd = os.getcwd()
-    subprocess.call("./build.sh", cwd = cwd + "/g2p_docker")
+    subprocess.call("./build.sh")
 
     print("starting g2p generation")
 
-    subprocess.call(["./run.sh", titles_path, g2p_path], cwd = cwd + "/g2p_docker")
+    subprocess.call(["./run.sh", titles_path, g2p_path])
 
     print("g2p succesfully generated")
 
