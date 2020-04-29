@@ -2,9 +2,4 @@
 # README
 #############################
 
-#call the program like "python3 g2p.py input_file output_file
-
-#so for example:
-#python3 g2p.py "/mnt/exchange/ASR Management/G2P/Spotify_Artists_top1000/sort_lang/#sort_lang_popularity/sort_lang_merged/var_artists_spotify_Top5000_pop.tsv"
-
-unfinished
+#call the program like: python3 Netflix_import_clean.py
