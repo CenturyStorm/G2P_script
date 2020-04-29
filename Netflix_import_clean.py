@@ -9,9 +9,11 @@ import pandas as pd
 import os
 import re
 import subprocess
+from langid import classify
+from shutil import copyfile
 
 # limit number of output lines to curb computation time
-n_min,n_max = 0,5000
+n_min,n_max = 0,100
 
 def import_data():
 
@@ -21,23 +23,27 @@ def import_data():
 
     # find latest zip file
     # WARNING: ONLY WORKS FOR 2020 FOR NOW. For multiple year script needs to be extended
-    for file in os.listdir(basepath):
-        if file.endswith("_2020.zip"):
-            netflix_zipfile = file
+    # try to unzip latest file, if that doesn't work look for folder of the same name and copy the de-DE file
+    try:
+        for file in os.listdir(basepath):
+            if file.endswith("_2020.zip"):
+                netflix_zipfile = file
 
-    # extract zipfile to json folder
-    with zp.ZipFile(basepath + netflix_zipfile, 'r') as f:
-        f.extract('de-DE.json', path = jsonpath)
-
-    # rename the file
+        # extract zipfile to json folder
+        with zp.ZipFile(basepath + netflix_zipfile, 'r') as f:
+            f.extract('de-DE.json', path = jsonpath)
+    except:
+        netflix_folder= netflix_zipfile.replace(".zip","/")
+        copyfile(basepath + netflix_folder + 'de-DE.json', jsonpath + 'de-DE.json')
     
     # take filename from zipfile
     netflix_zipfile_no_ext = re.split('\.', netflix_zipfile)[0]
     
-    #remove existing file if it exists
+    #remove existing named file if it exists
     if os.path.isfile(jsonpath + netflix_zipfile_no_ext + '_de-DE.json'):
         os.remove(jsonpath + netflix_zipfile_no_ext + '_de-DE.json')
     
+    # rename file from de-DE.json to Netflix EU-KR Data_MM_DD_YYYY_de-DE.json
     os.rename(jsonpath + 'de-DE.json',jsonpath + netflix_zipfile_no_ext + '_de-DE.json')
 
     # read the file
@@ -91,11 +97,47 @@ def clean_data(data):
     data.index = range(0, len(data))
 
     # limit data to n_limit entries
+    #if n_min and n_max != None:
     data = data[n_min:n_max]
     data.index = range(0, len(data))
 
     print("data cleaned")
     
+    return data
+
+def language_id(data):
+    langids = []
+
+    for title in data['title']:
+        langid = classify(title)[0]
+        if langid != 'de':
+            langid = 'en'
+        langids.append(langid)
+
+    data['language_id'] = langids
+
+    print("language identified")
+
+    return data
+
+
+def sideloading_data(basepath, data):
+
+    add_path = basepath + 'script_folder/sideload/add.txt'
+    del_path = basepath + 'script_folder/sideload/del.txt'
+
+    add_data = pd.read_fwf(add_path, delimiter = '\t', header = None)
+    del_data = pd.read_fwf(del_path, delimiter = '\t', header = None)
+
+    print(len(data['title']))
+    data.loc[:,'title'] = data['title'].append(add_data)
+    print(len(data['title']))
+    print(del_data)
+    data = data[data['title'] != del_data]
+    print(len(data['title']))
+
+    print("sideloaded data")
+
     return data
 
 
@@ -110,7 +152,6 @@ def export_data(basepath, data):
 
 
 def read_g2p(data, basepath):
-    
 
     titles_path = basepath + "script_folder/output/titles.txt"
     g2p_path = basepath + "script_folder/output/g2p.tsv"
@@ -140,7 +181,13 @@ if __name__ == "__main__":
     
     # clean data
     data = clean_data(data)
-    
+
+    # determine language of title
+    #data = language_id(data)
+
+    # add or remove entries
+    #data = sideloading_data(basepath, data)
+
     # optional exporting to textfile
     export_data(basepath, data)
 

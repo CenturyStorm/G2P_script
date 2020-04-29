@@ -17,11 +17,11 @@ output_file = str(sys.argv[2])
 input_file = str(sys.argv[1])
 #"/mnt/exchange/ASR Management/G2P/Spotify_Artists_top1000/sort_lang/sort_lang_popularity/sort_lang_merged/var_artists_spotify_Top5000_pop.tsv"
 
-with open(map_file, 'r', encoding="utf-8") as f:
-	map_dict={}
-	for line in f:
-		x = re.split(r"\t",line)
-		map_dict[x[0].strip()] = x[1].strip()
+#with open(map_file, 'r', encoding="utf-8") as f:
+#	map_dict={}
+#	for line in f:
+#		x = re.split(r"\t",line)
+#		map_dict[x[0].strip()] = x[1].strip()
 
 #def lang_map(string):
 #	phones = string.split()
