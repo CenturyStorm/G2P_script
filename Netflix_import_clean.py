@@ -1,7 +1,4 @@
-
 # coding: utf-8
-
-# In[329]:
 
 import json
 import zipfile as zp
@@ -123,18 +120,22 @@ def language_id(data):
 
 def sideloading_data(basepath, data):
 
-    add_path = basepath + 'script_folder/sideload/add.txt'
-    del_path = basepath + 'script_folder/sideload/del.txt'
+    # load side data
+    rep_path = basepath + 'script_folder/sideload/replace.tsv'
+    del_path = basepath + 'script_folder/sideload/delete.tsv'
 
-    add_data = pd.read_fwf(add_path, delimiter = '\t', header = None)
-    del_data = pd.read_fwf(del_path, delimiter = '\t', header = None)
+    rep_data = pd.read_csv(rep_path, sep = '\t', header = None, skiprows = 1, names = data.columns)
+    del_data = pd.read_csv(del_path, sep = '\t', header = None, skiprows = 1)
 
-    print(len(data['title']))
-    data.loc[:,'title'] = data['title'].append(add_data)
-    print(len(data['title']))
-    print(del_data)
-    data = data[data['title'] != del_data]
-    print(len(data['title']))
+    # overwrite entries if matched on the same title
+    data = data.append(rep_data)
+    data = data.drop_duplicates(subset = 'title', keep = 'last')
+    data.index = range(0, len(data))
+
+    # delete entries read from del_data
+    del_data_array = list(del_data.values.squeeze().tolist())
+    data = data[~data['title'].isin(del_data_array)]
+    data.index = range(0, len(data))
 
     print("sideloaded data")
 
@@ -145,15 +146,15 @@ def export_data(basepath, data):
 
     
     # export the data temporarily (optional)
-    titles_path = basepath + 'script_folder/output/titles.txt'
-    data['title'].to_csv(path_or_buf = titles_path, index = False, header = False, sep = '\t')
+    titles_path = basepath + 'script_folder/output/titles.tsv'
+    data.to_csv(path_or_buf = titles_path, index = False, sep = '\t')
     
     print("data exported to {}".format(titles_path))
 
 
 def read_g2p(data, basepath):
 
-    titles_path = basepath + "script_folder/output/titles.txt"
+    titles_path = basepath + "script_folder/output/titles.tsv"
     g2p_path = basepath + "script_folder/output/g2p.tsv"
 
     cwd = os.getcwd()
@@ -165,7 +166,7 @@ def read_g2p(data, basepath):
 
     print("g2p succesfully generated")
 
-    g2p_data = pd.read_csv(g2p_path, header = None)
+    g2p_data = pd.read_csv(g2p_path)
     
     data['g2p'] = g2p_data
 
@@ -183,10 +184,10 @@ if __name__ == "__main__":
     data = clean_data(data)
 
     # determine language of title
-    #data = language_id(data)
+    data = language_id(data)
 
     # add or remove entries
-    #data = sideloading_data(basepath, data)
+    data = sideloading_data(basepath, data)
 
     # optional exporting to textfile
     export_data(basepath, data)
