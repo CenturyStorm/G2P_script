@@ -8,16 +8,18 @@ import re
 import subprocess
 from langid import classify
 from shutil import copyfile
+from argparse import ArgumentParser
+
 
 # limit number of output lines to curb computation time
 n_min,n_max = 0,100
 
-def import_data():
+def import_data(exchange_path):
 
     # define paths
-    basepath = '/mnt/exchange/ASR Management/netflix/'
-    jsonpath = basepath + 'script_folder/json/'
-
+    basepath = os.path.join(exchange_path, 'ASR Management/netflix/')
+    jsonpath = os.path.join(basepath, 'script_folder/json/')
+    
     # find latest zip file
     # WARNING: ONLY WORKS FOR 2020 FOR NOW. For multiple year script needs to be extended
     # try to unzip latest file, if that doesn't work look for folder of the same name and copy the de-DE file
@@ -102,6 +104,7 @@ def clean_data(data):
     
     return data
 
+
 def language_id(data):
     langids = []
 
@@ -143,7 +146,6 @@ def sideloading_data(basepath, data):
 
 
 def export_data(basepath, data):
-
     
     # export the data temporarily (optional)
     titles_path = basepath + 'script_folder/output/titles.tsv'
@@ -162,7 +164,7 @@ def read_g2p(data, basepath):
 
     print("starting g2p generation")
 
-    subprocess.call(["./run.sh", titles_path, g2p_path])
+    subprocess.call(["./run.sh", "-t", titles_path, "-g", g2p_path])
 
     print("g2p succesfully generated")
 
@@ -177,8 +179,13 @@ def read_g2p(data, basepath):
 
 if __name__ == "__main__":
     
+    # Parse arguments
+    parser = ArgumentParser()
+    parser.add_argument('--exchange', '-e', required=False, default='/mnt/exchange/', help='Path to exchange.Default: /mnt/exchange/')
+    args = parser.parse_args()
+    
     # import data
-    data, basepath = import_data()
+    data, basepath = import_data(args.exchange)
     
     # clean data
     data = clean_data(data)
