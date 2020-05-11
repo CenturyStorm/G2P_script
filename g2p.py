@@ -14,7 +14,6 @@ output_file = str(sys.argv[2])
 input_file = str(sys.argv[1])
 
 data = pd.read_csv(input_file, sep = '\t')
-print(data.head())
 for index, row in data.iterrows():
 	
 	lang = row['language_id']

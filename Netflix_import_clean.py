@@ -12,7 +12,10 @@ from argparse import ArgumentParser
 
 
 # limit number of output lines to curb computation time
-n_min,n_max = 0,100
+N_MIN, N_MAX = 0,100
+
+#  constant defining the maximum number of g2p transcriptions per title
+MAX_G2P = 10
 
 def import_data(exchange_path):
 
@@ -96,8 +99,8 @@ def clean_data(data):
     data.index = range(0, len(data))
 
     # limit data to n_limit entries
-    #if n_min and n_max != None:
-    data = data[n_min:n_max]
+    #if N_MIN and N_MAX != None:
+    data = data[N_MIN:N_MAX]
     data.index = range(0, len(data))
 
     print("data cleaned")
@@ -154,23 +157,30 @@ def export_data(basepath, data):
     print("data exported to {}".format(titles_path))
 
 
-def read_g2p(data, basepath):
+def read_g2p(exchange_path, data, basepath):
 
-    titles_path = basepath + "script_folder/output/titles.tsv"
-    g2p_path = basepath + "script_folder/output/g2p.tsv"
+    titles_path = os.path.join(basepath, "script_folder/output/titles.tsv")
+    g2p_path = os.path.join(basepath, "script_folder/output/g2p.tsv")
 
-    cwd = os.getcwd()
     subprocess.call("./build.sh")
 
     print("starting g2p generation")
 
-    subprocess.call(["./run.sh", "-t", titles_path, "-g", g2p_path])
+    runsh = ["./run.sh", "-e", exchange_path, "-t", titles_path, "-g", g2p_path]
+    subprocess.call(runsh)
 
     print("g2p succesfully generated")
 
+    # read in g2p data and split into separate columns
     g2p_data = pd.read_csv(g2p_path)
-    
-    data['g2p'] = g2p_data
+    g2p_data = g2p_data['transcriptions'].str.split('\t', expand=True)
+    g2p_data.columns = ['g2p_{}'.format(i) for i in range(1, g2p_data.shape[1] + 1)]
+
+    # cut off dataframe after max number of g2p transcriptions
+    g2p_data = g2p_data.iloc[:,:MAX_G2P]
+
+    # merge g2p data together with original data
+    data = pd.concat([data, g2p_data], axis = 1)
 
     print("g2p read in and appended to original dataframe")
 
@@ -200,6 +210,6 @@ if __name__ == "__main__":
     export_data(basepath, data)
 
     # run g2p
-    data = read_g2p(data, basepath)
+    data = read_g2p(args.exchange, data, basepath)
 
     print(data)
