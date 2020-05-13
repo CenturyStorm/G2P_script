@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 
 
 # limit number of output lines to curb computation time
-N_MIN, N_MAX = 0,5000
+N_MIN, N_MAX = 0,100
 
 #  constant defining the maximum number of g2p transcriptions per title
 MAX_G2P = 10
@@ -191,16 +191,23 @@ def map_language(data):
 
     mapfile = 'en-US~de-De.tsv'
 
+    print(data.loc[:,:'g2p_1'])
+    
     mapfile_data = pd.read_csv(mapfile, sep = '\t', header = None, names = ['en-US','de-DE'])
 
     # remove lines that are the same
     mapfile_data = mapfile_data[mapfile_data['en-US'] != mapfile_data['de-DE']]
+
+    # add extra whitespaces for regex replacement
+    mapfile_data = ' ' + mapfile_data + ' '
 
     # map language in g2p output
     data.loc[:,'g2p_1':] = data.loc[:,'g2p_1':].replace(mapfile_data['en-US'].tolist(),
                                                         mapfile_data['de-DE'].tolist(), 
                                                         regex = True)
     
+    print(data.loc[:,:'g2p_1'])
+
     return data
 
 
