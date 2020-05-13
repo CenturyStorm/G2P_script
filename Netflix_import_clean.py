@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 
 
 # limit number of output lines to curb computation time
-N_MIN, N_MAX = 0,100
+N_MIN, N_MAX = 0,5000
 
 #  constant defining the maximum number of g2p transcriptions per title
 MAX_G2P = 10
@@ -171,7 +171,7 @@ def read_g2p(exchange_path, data, basepath):
 
     print("g2p succesfully generated")
 
-    # read in g2p data and split into separate columns
+    # read in g2p data and split into separate columns, named g2p_1 until g2p_{MAX_G2P + 1}
     g2p_data = pd.read_csv(g2p_path)
     g2p_data = g2p_data['transcriptions'].str.split('\t', expand=True)
     g2p_data.columns = ['g2p_{}'.format(i) for i in range(1, g2p_data.shape[1] + 1)]
@@ -184,6 +184,23 @@ def read_g2p(exchange_path, data, basepath):
 
     print("g2p read in and appended to original dataframe")
 
+    return data
+
+
+def map_language(data):
+
+    mapfile = 'en-US~de-De.tsv'
+
+    mapfile_data = pd.read_csv(mapfile, sep = '\t', header = None, names = ['en-US','de-DE'])
+
+    # remove lines that are the same
+    mapfile_data = mapfile_data[mapfile_data['en-US'] != mapfile_data['de-DE']]
+
+    # map language in g2p output
+    data.loc[:,'g2p_1':] = data.loc[:,'g2p_1':].replace(mapfile_data['en-US'].tolist(),
+                                                        mapfile_data['de-DE'].tolist(), 
+                                                        regex = True)
+    
     return data
 
 
@@ -211,5 +228,8 @@ if __name__ == "__main__":
 
     # run g2p
     data = read_g2p(args.exchange, data, basepath)
+
+    # map g2p from en-US to de-DE
+    data = map_language(data)
 
     print(data)
