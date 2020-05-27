@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 
 
 # limit number of output lines to curb computation time
-N_MIN, N_MAX = 0,100
+N_MIN, N_MAX = 0,5000
 
 #  constant defining the maximum number of g2p transcriptions per title
 MAX_G2P = 10
@@ -63,9 +63,9 @@ def clean_data(data):
     # select data that we need
     data = data.loc[:,['title','type']]
 
-    # make everythings lowercase
-    data.loc[:,'title'] = data['title'].str.lower()
-    data.loc[:,'type'] = data['type'].str.lower()
+    # make everythings lowercase. DISABLED
+    #data.loc[:,'title'] = data['title'].str.lower()
+    #data.loc[:,'type'] = data['type'].str.lower()
 
     # set both columns to type string
     data = data.astype("string")
@@ -148,10 +148,10 @@ def sideloading_data(basepath, data):
     return data
 
 
-def export_data(basepath, data):
+def tempdump_data(basepath, data):
     
     # export the data temporarily (optional)
-    titles_path = basepath + 'script_folder/output/titles.tsv'
+    titles_path = os.path.join(basepath, "script_folder/output/titles.tsv")
     data.to_csv(path_or_buf = titles_path, index = False, sep = '\t')
     
     print("data exported to {}".format(titles_path))
@@ -190,25 +190,37 @@ def read_g2p(exchange_path, data, basepath):
 def map_language(data):
 
     mapfile = 'en-US~de-De.tsv'
-
-    print(data.loc[:,:'g2p_1'])
     
     mapfile_data = pd.read_csv(mapfile, sep = '\t', header = None, names = ['en-US','de-DE'])
 
     # remove lines that are the same
     mapfile_data = mapfile_data[mapfile_data['en-US'] != mapfile_data['de-DE']]
 
-    # add extra whitespaces for regex replacement
-    mapfile_data = ' ' + mapfile_data + ' '
+    # add extra whitespaces/tabs/beginning/end for regex replacement
+    mapfile_data['en-US'] = '(^|\t| )' + mapfile_data['en-US'] + '( |\t|$)'
+    mapfile_data['de-DE'] = '\\1' + mapfile_data['de-DE'] + '\\2'
+
+    print(mapfile_data['en-US'].tolist(), len(mapfile_data['en-US'].tolist()))
+    print(mapfile_data['de-DE'].tolist(), len(mapfile_data['de-DE'].tolist()))
 
     # map language in g2p output
     data.loc[:,'g2p_1':] = data.loc[:,'g2p_1':].replace(mapfile_data['en-US'].tolist(),
                                                         mapfile_data['de-DE'].tolist(), 
                                                         regex = True)
-    
-    print(data.loc[:,:'g2p_1'])
+
+    # map language in g2p output
+    #data.loc[:,'g2p_1':] = data.loc[:,'g2p_1':].replace(['ao', 'dh'],
+    #                                                    ['oo', 'd'], 
+    #                                                    regex = True)
 
     return data
+
+
+def export_data(data):
+    titles_path = os.path.join(basepath, "script_folder/output/titles.tsv")
+    data.to_csv(path_or_buf = titles_path, index = False, sep = '\t')
+    
+    print("data exported to {}".format(titles_path))
 
 
 if __name__ == "__main__":
@@ -231,7 +243,7 @@ if __name__ == "__main__":
     data = sideloading_data(basepath, data)
 
     # optional exporting to textfile
-    export_data(basepath, data)
+    tempdump_data(basepath, data)
 
     # run g2p
     data = read_g2p(args.exchange, data, basepath)
@@ -239,4 +251,4 @@ if __name__ == "__main__":
     # map g2p from en-US to de-DE
     data = map_language(data)
 
-    print(data)
+    export_data(data)
