@@ -2,4 +2,64 @@
 # README
 #############################
 
-#call the program like: python3 Netflix_import_clean.py
+####
+#requirements:
+python3
+standard python3 libraries
+pandas
+langid
+
+
+This program was made to create tags for G2P/LM out of a list of names/titles. So far it only handles Netflix data, but in principle it can handle any list of titles.
+
+
+
+
+#############################
+# Netflix_import_clean.py
+#############################
+
+Netflix_import_clean creates the language tag using the langid pip module. It's not extremely accurate but does a decent job.
+
+
+
+# import data
+
+imports the data from the zipped Netflix json file stored in ASR Management/netflix. It reads the zipfile and exports the json file to script_folder/json and renames the json file with the name taken from the zipfolder (for date tagging). Then it is read in using pandas' read_json.
+
+# clean data
+
+This module cleans the data of invalid characters. It converts hyphens of different unicode into the common hyphen -. 
+
+Items that are removed:
+- titles with non arabic characters
+- hyphens which are not directly in between words or before a number (ex. text-to-speech, -10)
+- double spaces
+- leading or trailing spaces
+- duplicate titles (not counting different cases)
+- empty titles
+
+
+with N_MIN and N_MAX you have control over importing only a subset of the data (starting and ending line)
+
+# language id
+
+This module classifies the language of the title using langid python module. Currently it is set to german and english only (If the language detected is not german then assume english)
+
+
+# sideloading data
+
+# tempdump data
+
+# read g2p
+
+# map language
+
+# export data
+
+#############################
+# Convert_titles_to_tags.py
+#############################
+
+
+Convert_titles_to_tags.py as the name suggests converts the titles output from Netflix_import_clean.py to tags.

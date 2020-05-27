@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 
 
 # limit number of output lines to curb computation time
-N_MIN, N_MAX = 0,5000
+N_MIN, N_MAX = None,None
 
 #  constant defining the maximum number of g2p transcriptions per title
 MAX_G2P = 10
