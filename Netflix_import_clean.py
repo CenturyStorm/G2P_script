@@ -208,10 +208,6 @@ def map_language(data):
                                                         mapfile_data['de-DE'].tolist(), 
                                                         regex = True)
 
-    # map language in g2p output
-    #data.loc[:,'g2p_1':] = data.loc[:,'g2p_1':].replace(['ao', 'dh'],
-    #                                                    ['oo', 'd'], 
-    #                                                    regex = True)
 
     return data
 

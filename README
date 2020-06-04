@@ -27,6 +27,7 @@ Netflix_import_clean creates the language tag using the langid pip module. It's 
 
 imports the data from the zipped Netflix json file stored in ASR Management/netflix. It reads the zipfile and exports the json file to script_folder/json and renames the json file with the name taken from the zipfolder (for date tagging). Then it is read in using pandas' read_json.
 
+
 # clean data
 
 This module cleans the data of invalid characters. It converts hyphens of different unicode into the common hyphen -. 
@@ -39,8 +40,8 @@ Items that are removed:
 - duplicate titles (not counting different cases)
 - empty titles
 
-
 with N_MIN and N_MAX you have control over importing only a subset of the data (starting and ending line)
+
 
 # language id
 
@@ -49,17 +50,48 @@ This module classifies the language of the title using langid python module. Cur
 
 # sideloading data
 
+Data can be entered into the title list either to replace the data (like if the automatic language id is wrong) by adding it to sideload/replace.tsv or simply delete it from the list by adding it to sideload/delete.tsv
+
+
 # tempdump data
+
+This module dumps the current data in a tsv file called output/titles.tsv. It needs to do that in order to provide the data to the next module.
+
 
 # read g2p
 
+The module provides the transcriptions to the titles that we have cleaned so far. It does this by running a g2p transcript generator under a docker file. The following files are utilised:
+- Dockerfile: Build the docker image. Mostly installing linux and python dependencies and setting the correct paths
+- build.sh: builds the docker image with the Dockerfile file
+- run.sh: running the docker image with additional arguments for input (netflix titles) and output (g2p transcription)
+- g2p.py: called by the docker image. Reads in netflix titles and runs the g2p transcription generator over every line in a loop
+- g2p-eand-de-DE-0.119.0-20190409.tar.bz2: The g2p transcription generator. This file is unpacked and it's contents run by the docker image and g2p.py to generate transcriptions for the titles input.
+
+After the transcriptions are generated, the output is stored in output/g2p.tsv. Subsequently the data is read in again and concatentated to the existing dataframe consisting of titles, language_id and show type.
+
+MAX_G2P defines the maximum number of G2P transcriptions are appended. Currently set to 1
+
+
 # map language
 
+This module maps english phonemes to german phonemes for all of the transcriptions using a regex replacement statement within pandas
+
 # export data
+
+Exports the whole pandas file as output to output/titles.tsv (Basically overwrites the already outputted titles.tsv from tempdump data module)
+
+The output file consists of at least four columns: title \t type \t language_id \t g2p_1 (optional "g2p_2" "g2p_3" and so on)
+
 
 #############################
 # Convert_titles_to_tags.py
 #############################
 
 
-Convert_titles_to_tags.py as the name suggests converts the titles output from Netflix_import_clean.py to tags.
+Convert_titles_to_tags.py as the name suggests converts the titles output from Netflix_import_clean.py to tags. (title \t type \t languageid -> title_languageid_type)
+
+Currently set:
+- \s in title converted to ;
+- type is only allowed to be TVSHOWS
+- en -> enUS
+- de -> deDE 
