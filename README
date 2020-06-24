@@ -21,12 +21,9 @@ This program was made to create tags for G2P/LM out of a list of names/titles. S
 
 Netflix_import_clean creates the language tag using the langid pip module. It's not extremely accurate but does a decent job.
 
+# import data txt
 
-
-# import data
-
-imports the data from the zipped Netflix json file stored in ASR Management/netflix. It reads the zipfile and exports the json file to script_folder/json and renames the json file with the name taken from the zipfolder (for date tagging). Then it is read in using pandas' read_json.
-
+A list of titles and show types (Or only titles, then the type will be set to SHOW) must be given to /script_folder/output/netflix_titles.tsv.
 
 # clean data
 
@@ -55,7 +52,7 @@ Data can be entered into the title list either to replace the data (like if the 
 
 # tempdump data
 
-This module dumps the current data in a tsv file called output/titles.tsv. It needs to do that in order to provide the data to the next module.
+This module dumps the current data in a tsv file called output/netflix_titles_with_g2p.tsv. It needs to do that in order to provide the data to the next module.
 
 
 # read g2p
@@ -78,7 +75,7 @@ This module maps english phonemes to german phonemes for all of the transcriptio
 
 # export data
 
-Exports the whole pandas file as output to output/titles.tsv (Basically overwrites the already outputted titles.tsv from tempdump data module)
+Exports the whole pandas file as output to output/netflix_titles_with_g2p.tsv (Basically overwrites the already outputted netflix_titles_with_g2p.tsv from tempdump data module)
 
 The output file consists of at least four columns: title \t type \t language_id \t g2p_1 (optional "g2p_2" "g2p_3" and so on)
 

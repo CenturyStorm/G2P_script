@@ -9,9 +9,10 @@ print("python version = " + sys.version)
 transcriptions = []
 g2pde = "/g2p-eand-de-DE-0.119.0/bin/de-DE"
 g2pen = "/g2p-eand-de-DE-0.119.0/bin/en-US"
-map_file = "/home/en-US~de-De.tsv"
-output_file = str(sys.argv[2])
+map_file = "/en-US~de-De.tsv"
 input_file = str(sys.argv[1])
+output_file = str(sys.argv[2])
+
 
 data = pd.read_csv(input_file, sep = '\t')
 for index, row in data.iterrows():

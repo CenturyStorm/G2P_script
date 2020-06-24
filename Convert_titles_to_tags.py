@@ -1,4 +1,11 @@
 # coding: utf-8
+#######################
+#
+# This script uses the 
+#
+# (c) Lars Tijssen
+#
+########################
 
 import json
 import zipfile as zp
@@ -13,11 +20,22 @@ from argparse import ArgumentParser
 # define paths globally
 
 
-def import_data(exchange_path):
+def import_data_json(exchange_path):
 
 	# define import path
 	basepath = os.path.join(exchange_path, 'ASR Management/netflix/')
 	titles_path = os.path.join(basepath, "script_folder/output/titles.tsv")
+
+	# read in data
+	data = pd.read_csv(titles_path, sep = '\t')
+
+	return data
+
+def import_data_txt(exchange_path):
+
+	# define import path
+	basepath = ''
+	titles_path = os.path.join(basepath, "/script_folder/output/titles.tsv")
 
 	# read in data
 	data = pd.read_csv(titles_path, sep = '\t')
@@ -77,7 +95,9 @@ if __name__ == "__main__":
     parser.add_argument('--exchange', '-e', required=False, default='/mnt/exchange/', help='Path to exchange.Default: /mnt/exchange/')
     args = parser.parse_args()
 
-    data = import_data(args.exchange)
+    #data = import_data_json(args.exchange)
+
+    data = import_data_txt(args.exchange)
 
     data = modify_data(data)
 
