@@ -1,4 +1,11 @@
 # coding: utf-8
+#######################
+#
+# This script creates phonetic transcriptions from titles in english and german
+#
+# (c) Lars Tijssen
+#
+########################
 
 import json
 import zipfile as zp
@@ -17,7 +24,7 @@ N_MIN, N_MAX = None,None
 #  constant defining the maximum number of g2p transcriptions per title
 MAX_G2P = 10
 
-def import_data_txt(source_path):
+def import_data_tsv(source_path):
 
     df = pd.read_csv(sourcepath, sep = '\t')
 
@@ -137,7 +144,7 @@ def read_g2p(g2p_path, df):
     print("starting g2p generation")
 
     #runsh = ["./run.sh", "-e", exchange_path, "-t", titles_path, "-g", g2p_path]
-    runsh = ["./run.sh", "-t", "/output/netflix_titles_with_g2p.tsv", "-g", "/output/g2p.tsv"]
+    runsh = ["./run.sh", "-t", "/output/netflix_titles_g2p.tsv", "-g", "/output/g2p.tsv"]
     subprocess.call(runsh)
 
     print("g2p succesfully generated")
@@ -189,15 +196,15 @@ def export_data(titles_path, df):
 if __name__ == "__main__":
     
     # define paths
-    sourcepath = 'script_folder/output/netflix_titles.txt'
-    titlespath = 'script_folder/output/netflix_titles_with_g2p.tsv'
+    sourcepath = 'script_folder/output/netflix_titles.tsv'
+    titlespath = 'script_folder/output/netflix_titles_g2p.tsv'
     g2ppath = 'script_folder/output/g2p.tsv'
 
     replacepath = 'script_folder/sideload/replace.tsv'
     deletepath = 'script_folder/sideload/delete.tsv'
 
     # import data
-    data = import_data_txt(sourcepath)
+    data = import_data_tsv(sourcepath)
     
     # clean data
     data = clean_data(data)

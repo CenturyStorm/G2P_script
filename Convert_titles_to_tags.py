@@ -1,7 +1,7 @@
 # coding: utf-8
 #######################
 #
-# This script uses the 
+# This script uses the file generated from Netflix_import_clean.py to create tags
 #
 # (c) Lars Tijssen
 #
@@ -17,28 +17,13 @@ from langid import classify
 from shutil import copyfile
 from argparse import ArgumentParser
 
-# define paths globally
 
-
-def import_data_json(exchange_path):
-
-	# define import path
-	basepath = os.path.join(exchange_path, 'ASR Management/netflix/')
-	titles_path = os.path.join(basepath, "script_folder/output/titles.tsv")
+def import_data_tsv(source_path):
 
 	# read in data
-	data = pd.read_csv(titles_path, sep = '\t')
+	data = pd.read_csv(source_path, sep = '\t')
 
-	return data
-
-def import_data_txt(exchange_path):
-
-	# define import path
-	basepath = ''
-	titles_path = os.path.join(basepath, "/script_folder/output/titles.tsv")
-
-	# read in data
-	data = pd.read_csv(titles_path, sep = '\t')
+	print("data imported")
 
 	return data
 
@@ -68,37 +53,31 @@ def modify_data(data):
 
 	data = data[['g2p_tag', 'g2p_1']]
 
+	print("tags created")
+
 	return data
 
 
-
-def export_data(exchange_path, data):
-
-	# define output path
-	basepath = os.path.join(exchange_path, 'ASR Management/netflix/')
-	
-	g2p_output_path = os.path.join(basepath, "script_folder/output/g2p_output.tsv")
+def export_data(output_path, data):
 
 	# add de-DE at top of file
 	data_de = pd.DataFrame(['de-DE'])
-	data_de.to_csv(path_or_buf = g2p_output_path, index = False, header = None)
+	data_de.to_csv(path_or_buf = output_path, index = False, header = None)
 
 	# export data to already existing g2p_output_path file
-	data.to_csv(path_or_buf = g2p_output_path, mode = 'a', index = False, sep = '\t', header = None)
+	data.to_csv(path_or_buf = output_path, mode = 'a', index = False, sep = '\t', header = None)
 
+	print("data exported to {}".format(output_path))
 
 
 if __name__ == "__main__":
     
-    # Parse arguments
-    parser = ArgumentParser()
-    parser.add_argument('--exchange', '-e', required=False, default='/mnt/exchange/', help='Path to exchange.Default: /mnt/exchange/')
-    args = parser.parse_args()
+    #define paths
+    sourcepath = 'script_folder/output/netflix_titles_g2p.tsv'
+    outputpath = 'script_folder/output/netflix_titles_g2p_tags.tsv'
 
-    #data = import_data_json(args.exchange)
-
-    data = import_data_txt(args.exchange)
+    data = import_data_tsv(sourcepath)
 
     data = modify_data(data)
 
-    export_data(args.exchange, data)
+    export_data(outputpath, data)
