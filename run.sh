@@ -17,7 +17,7 @@ while getopts ":t:g:" option; do
 done
 
 docker run -it \
-    --mount src="$(pwd)"/script_folder/output,target=/output,type=bind \
+    --mount src="$(pwd)"/source_files/output,target=/output,type=bind \
     lars_g2p "$TITLES" "$G2P"
     
 

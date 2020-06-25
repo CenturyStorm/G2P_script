@@ -196,12 +196,12 @@ def export_data(titles_path, df):
 if __name__ == "__main__":
     
     # define paths
-    sourcepath = 'script_folder/output/netflix_titles.tsv'
-    titlespath = 'script_folder/output/netflix_titles_g2p.tsv'
-    g2ppath = 'script_folder/output/g2p.tsv'
+    sourcepath = 'source_files/output/netflix_titles.tsv'
+    titlespath = 'source_files/output/netflix_titles_g2p.tsv'
+    g2ppath = 'source_files/output/g2p.tsv'
 
-    replacepath = 'script_folder/sideload/replace.tsv'
-    deletepath = 'script_folder/sideload/delete.tsv'
+    replacepath = 'source_files/sideload/replace.tsv'
+    deletepath = 'source_files/sideload/delete.tsv'
 
     # import data
     data = import_data_tsv(sourcepath)
@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
 #    # define paths
 #    basepath = os.path.join(exchange_path, 'ASR Management/netflix/')
-#    jsonpath = os.path.join(basepath, 'script_folder/json/')
+#    jsonpath = os.path.join(basepath, 'source_files/json/')
 #    
 #    # find latest zip file
 #    # WARNING: ONLY WORKS FOR 2020 FOR NOW. For multiple year script needs to be extended

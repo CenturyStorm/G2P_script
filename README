@@ -23,7 +23,7 @@ Netflix_import_clean creates the language tag using the langid pip module. It's 
 
 # import data txt
 
-A list of titles and show types (Or only titles, then the type will be set to SHOW) must be given to /script_folder/output/netflix_titles.tsv.
+A list of titles and show types (Or only titles, then the type will be set to SHOW) must be given to /source_files/output/netflix_titles.tsv.
 
 # clean data
 

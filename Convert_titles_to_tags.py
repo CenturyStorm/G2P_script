@@ -73,8 +73,8 @@ def export_data(output_path, data):
 if __name__ == "__main__":
     
     #define paths
-    sourcepath = 'script_folder/output/netflix_titles_g2p.tsv'
-    outputpath = 'script_folder/output/netflix_titles_g2p_tags.tsv'
+    sourcepath = 'source_files/output/netflix_titles_g2p.tsv'
+    outputpath = 'source_files/output/netflix_titles_g2p_tags.tsv'
 
     data = import_data_tsv(sourcepath)
 

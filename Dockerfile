@@ -19,7 +19,7 @@ RUN apt-get update
 RUN apt-get install -y python3-pip python3-dev python3-pandas python3-numpy
 RUN pip3 install langid
 
-ADD script_folder/output/titles.tsv /home
+ADD source_files/output/titles.tsv /home
 ADD g2p.py /home
 
 ENTRYPOINT ["python3","g2p.py"]
